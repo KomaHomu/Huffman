@@ -44,8 +44,9 @@ generate_button_rect = pygame.Rect(input_box.x - 320, y_button, 180, 50)
 reset_button_rect = pygame.Rect(input_box.x + input_box.width + margin // 10, y_button, 100, 50)
 prev_button_rect = pygame.Rect(reset_button_rect.x + reset_button_rect.width + margin // 10, y_button, 100, 50)
 next_button_rect = pygame.Rect(prev_button_rect.x + prev_button_rect.width + margin // 10, y_button, 100, 50)
-decode_button_rect = pygame.Rect(width // 2, height - 80, 180, 50)
-next_decode_button_rect = pygame.Rect(decode_button_rect.x + decode_button_rect.width + margin // 10, decode_button_rect.y, 100, 50)
+decode_button_rect = pygame.Rect(width // 2 - 90, height - 150, 180, 50)
+next_decode_button_rect = pygame.Rect(decode_button_rect.x + decode_button_rect.width + margin // 10,
+                                      decode_button_rect.y, 100, 50)
 decode_button_active = False
 
 # Tree visualization variables
@@ -95,8 +96,8 @@ def visualize_huffman_heap(nodes):
             temp = temp.right
             padding_right += padding_for_child * 2 + 60
             height_right += 1
-        x += max(padding_left,padding_right)
-        visualize_huffman_tree(node, x, 200, padding_for_child * max(height_left,height_right), 150)
+        x += max(padding_left, padding_right)
+        visualize_huffman_tree(node, x, 200, padding_for_child * max(height_left, height_right), 150)
 
         # Increment x position
         if node.right is not None:
@@ -105,6 +106,7 @@ def visualize_huffman_heap(nodes):
 
     # Update the end of screen
     end_of_screen_x = x - width
+
 
 def visualize_huffman_tree(node, x, y, dx, dy, code=""):
     global end_of_screen_y
@@ -155,6 +157,7 @@ def visualize_huffman_tree(node, x, y, dx, dy, code=""):
         screen.blit(code_text, code_rect)
         visualize_huffman_tree(node.right, x_right, y_right, dx / 2, dy, code + "1")
 
+
 def visualize_decoding_huffman_heap(curr_node, nodes):
     global end_of_screen_x
     padding_for_child = 100
@@ -196,8 +199,9 @@ def visualize_decoding_huffman_heap(curr_node, nodes):
             temp = temp.right
             padding_right += padding_for_child * 2 + 60
             height_right += 1
-        x += max(padding_left,padding_right)
-        visualize_decoding_huffman_tree(curr_node, node, x, 200, padding_for_child * max(height_left,height_right), 150)
+        x += max(padding_left, padding_right)
+        visualize_decoding_huffman_tree(curr_node, node, x, 200, padding_for_child * max(height_left, height_right),
+                                        150)
 
         # Increment x position
         if node.right is not None:
@@ -206,6 +210,7 @@ def visualize_decoding_huffman_heap(curr_node, nodes):
 
     # Update the end of screen
     end_of_screen_x = x - width
+
 
 def visualize_decoding_huffman_tree(decoded_node, node, x, y, dx, dy, code=""):
     global end_of_screen_y
@@ -227,7 +232,6 @@ def visualize_decoding_huffman_tree(decoded_node, node, x, y, dx, dy, code=""):
         text_surface = font.render(str(node.freq), True, BLACK)
     text_rect = text_surface.get_rect(center=(x, y))
     screen.blit(text_surface, text_rect)
-
 
     # Draw the code on the node if it's a leaf node
     if node.left is None and node.right is None:
@@ -260,6 +264,7 @@ def visualize_decoding_huffman_tree(decoded_node, node, x, y, dx, dy, code=""):
         screen.blit(code_text, code_rect)
 
         visualize_decoding_huffman_tree(decoded_node, node.right, x_right, y_right, dx / 2, dy, code + "1")
+
 
 def build_tree_with_steps(data):
     list_char = huffman.calc_freq(data)
@@ -333,16 +338,19 @@ def main():
                     current_step -= 1
 
                 # Check if the next button is clicked
-                if next_button_rect.collidepoint(mouse_pos) and current_step < len(tree_steps) - 1 and construction_complete:
+                if next_button_rect.collidepoint(mouse_pos) and current_step < len(
+                        tree_steps) - 1 and construction_complete:
                     current_step += 1
 
-                # Check if the next button is clicked
-                if next_decode_button_rect.collidepoint(mouse_pos) and decode_step < len(encoded_message) - 1 and decode_button_active:
+                # Check if the next decode button is clicked
+                if next_decode_button_rect.collidepoint(mouse_pos) and decode_step < len(
+                        encoded_message) - 1 and decode_button_active:
                     decode_step += 1
                     active = True
 
                 # Check if the decode button is clicked
-                if decode_button_rect.collidepoint(mouse_pos) and construction_complete and current_step == len(tree_steps) - 1:
+                if decode_button_rect.collidepoint(mouse_pos) and construction_complete and current_step == len(
+                        tree_steps) - 1 and input_text != decoded_message and not decode_button_active:
                     decode_button_active = True
                     code = encoded_message
                     current = tree_steps[current_step][0]
@@ -353,6 +361,10 @@ def main():
                     encoded_message = huffman.encode(input_text)[3]
                     tree_steps = build_tree_with_steps(input_text)
                     construction_complete = True
+                    active = False
+                    decoded_message = ""
+                    decode_button_active = False
+                    decode_step = -1
 
             if event.type == pygame.KEYDOWN:
                 if input_active:
@@ -362,6 +374,9 @@ def main():
                         construction_complete = True
                         input_active = False
                         current_step = 0
+                        decoded_message = ""
+                        decode_button_active = False
+                        decode_step = -1
                     elif event.key == pygame.K_BACKSPACE and len(input_text) > 0:
                         input_text = input_text[:-1]
                     elif len(input_text) < 104:
@@ -391,7 +406,7 @@ def main():
                         screen_x = - end_of_screen_x
                         screen_y = - end_of_screen_y
 
-        if decode_button_active == True:
+        if decode_button_active:
             c = code[decode_step]
 
             if active:
@@ -404,13 +419,17 @@ def main():
 
             screen.fill(WHITE)
             visualize_decoding_huffman_heap(current, tree_steps[current_step])
-            window.blit(screen, (screen_x, screen_y))
 
+            encoded_text = font.render("Encoding Message: " + encoded_message[decode_step + 1:], True, BLACK)
+            screen.blit(encoded_text,
+                        (generate_button_rect.x, generate_button_rect.y + generate_button_rect.height + 10))
+
+            window.blit(screen, (screen_x, screen_y))
             if current.char is not None:
                 decoded_message += current.char
                 current = tree_steps[current_step][0]
-        
-        if decode_button_active == False:
+
+        if not decode_button_active:
             # Draw screen
             screen.fill(WHITE)
             if current_step < len(tree_steps):
@@ -466,7 +485,10 @@ def main():
         # Draw the Decode button
         if construction_complete and current_step == len(tree_steps) - 1:
             pygame.draw.rect(window, GRAY, decode_button_rect)
-            decode_button_text = font.render("Decode", True, BLACK)
+            if input_text != decoded_message:
+                decode_button_text = font.render("Decode", True, BLACK)
+            else:
+                decode_button_text = font.render("Decoded", True, BLACK)
             decode_button_text_rect = decode_button_text.get_rect()
             decode_button_text_rect.center = decode_button_rect.center
             window.blit(decode_button_text, decode_button_text_rect)
@@ -476,7 +498,7 @@ def main():
             window.blit(decoded_text,
                         (decode_button_rect.x, decode_button_rect.y - decode_button_rect.height - 10))
 
-        if decode_button_active == True:
+        if decode_button_active:
             pygame.draw.rect(window, GRAY, next_decode_button_rect)
             next_decode_button_text = font.render("Next", True, BLACK)
             next_decode_button_text_rect = next_decode_button_text.get_rect()
