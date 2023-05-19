@@ -21,7 +21,7 @@ class Node:
         return self.freq < other.freq
 
     def __eq__(self, other):
-        return self.freq == other.freq
+        return self.freq == other.freq and self.char == other.char and self.left == other.left and self.right == other.right
 
     def __gt__(self, other):
         return self.freq > other.freq
@@ -58,6 +58,15 @@ class Node:
             return [self]
         else:
             return (self.left.leafs() if self.left is not None else []) + (self.right.leafs() if self.right is not None else [])
+    def copy(self):
+        node_copy = Node(self.char)
+        if self.left is not None:
+            node_copy.left = self.left.copy()
+        if self.right is not None:
+            node_copy.right = self.right.copy()
+        return node_copy
+    def set_freq(self, freq):
+        self.freq = freq
         
 def calc_freq(data):
     list_char = {}
@@ -136,3 +145,18 @@ def encode(data):
         res += huffman_dict[char]
     res = root.to_table() + [res]
     return res
+
+def decode(code, huffman_tree=None):
+    if huffman_tree is None:
+        huffman_tree, code = table_to_tree(code)
+    current = huffman_tree
+    data = ''
+    for c in code:
+        if c == '0':
+            current = current.left
+        elif c == '1':
+            current = current.right
+        if current.char is not None:
+            data += current.char
+            current = huffman_tree
+    return data
