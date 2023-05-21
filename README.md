@@ -1,2 +1,3 @@
 # Huffman-coding
- Huffman coding implemented in Python.
+Link báo cáo:
+https://www.overleaf.com/9939351869mmqryrcnsbjb
