@@ -14,8 +14,8 @@ INACTIVE_COLOR = (150, 150, 150)
 pygame.init()
 
 # Set up the window
-width = 1920
-height = 1080
+width, height = pygame.display.Info().current_w, pygame.display.Info().current_h
+# width, height = 1366, 768
 margin = 270
 window = pygame.display.set_mode((width, height))
 pygame.display.set_caption("Huffman Tree Visualization")
@@ -39,12 +39,12 @@ encoded_message = ""
 decoded_message = ""
 
 # Button variables
-y_button = input_box.y - 10
-generate_button_rect = pygame.Rect(input_box.x - 320, y_button, 180, 50)
-reset_button_rect = pygame.Rect(input_box.x + input_box.width + margin // 10, y_button, 100, 50)
+generate_button_rect = pygame.Rect(input_box.x - 320, input_box.y - 10, 180, 50)
+y_button = generate_button_rect.y + generate_button_rect.height + 20
+reset_button_rect = pygame.Rect(generate_button_rect.x , y_button, 100, 50)
 prev_button_rect = pygame.Rect(reset_button_rect.x + reset_button_rect.width + margin // 10, y_button, 100, 50)
 next_button_rect = pygame.Rect(prev_button_rect.x + prev_button_rect.width + margin // 10, y_button, 100, 50)
-decode_button_rect = pygame.Rect(width // 2 - 90, height - 150, 180, 50)
+decode_button_rect = pygame.Rect(width // 2 - 90, height//10*8.75, 180, 50)
 next_decode_button_rect = pygame.Rect(decode_button_rect.x + decode_button_rect.width + margin // 10,
                                       decode_button_rect.y, 100, 50)
 decode_button_active = False
@@ -97,7 +97,7 @@ def visualize_huffman_heap(nodes):
             padding_right += padding_for_child * 2 + 60
             height_right += 1
         x += max(padding_left, padding_right)
-        visualize_huffman_tree(node, x, 200, padding_for_child * max(height_left, height_right), 150)
+        visualize_huffman_tree(node, x, reset_button_rect.y + reset_button_rect.height + 100, padding_for_child * max(height_left, height_right), 150)
 
         # Increment x position
         if node.right is not None:
@@ -105,7 +105,7 @@ def visualize_huffman_heap(nodes):
         x += step
 
     # Update the end of screen
-    end_of_screen_x = x - width
+    end_of_screen_x = x - width + 100
 
 
 def visualize_huffman_tree(node, x, y, dx, dy, code=""):
@@ -133,7 +133,7 @@ def visualize_huffman_tree(node, x, y, dx, dy, code=""):
         screen.blit(code_surface, code_rect)
         # Update the end of screen
         if y + radius + 20 > end_of_screen_y:
-            end_of_screen_y = y + radius + 150 - height
+            end_of_screen_y = y + radius + 200 - height
         if end_of_screen_y < 0:
             end_of_screen_y = 0
     # Plot the left child
@@ -209,7 +209,7 @@ def visualize_decoding_huffman_heap(curr_node, nodes):
         x += step
 
     # Update the end of screen
-    end_of_screen_x = x - width
+    end_of_screen_x = x - width + 100
 
 
 def visualize_decoding_huffman_tree(decoded_node, node, x, y, dx, dy, code=""):
@@ -240,7 +240,7 @@ def visualize_decoding_huffman_tree(decoded_node, node, x, y, dx, dy, code=""):
         screen.blit(code_surface, code_rect)
         # Update the end of screen
         if y + radius + 20 > end_of_screen_y:
-            end_of_screen_y = y + radius + 150 - height
+            end_of_screen_y = y + radius + 200 - height
         if end_of_screen_y < 0:
             end_of_screen_y = 0
     # Plot the left child
@@ -422,7 +422,7 @@ def main():
 
             encoded_text = font.render("Encoding Message: " + encoded_message[decode_step + 1:], True, BLACK)
             screen.blit(encoded_text,
-                        (generate_button_rect.x, generate_button_rect.y + generate_button_rect.height + 10))
+                        (reset_button_rect.x, reset_button_rect.y + reset_button_rect.height + 20))
 
             window.blit(screen, (screen_x, screen_y))
             if current.char is not None:
@@ -438,7 +438,7 @@ def main():
                 # Draw the encoded message
                 encoded_text = font.render("Encoded Message: " + encoded_message, True, BLACK)
                 screen.blit(encoded_text,
-                            (generate_button_rect.x, generate_button_rect.y + generate_button_rect.height + 10))
+                            (reset_button_rect.x, reset_button_rect.y + reset_button_rect.height + 20))
             window.blit(screen, (screen_x, screen_y))
 
         # Draw the input box
@@ -496,7 +496,7 @@ def main():
             # Draw the "Decoded Message:" text
             decoded_text = font.render("Decoded Message: " + decoded_message, True, BLACK)
             window.blit(decoded_text,
-                        (decode_button_rect.x, decode_button_rect.y - decode_button_rect.height - 10))
+                        (decode_button_rect.x, decode_button_rect.y - 30))
 
         if decode_button_active:
             pygame.draw.rect(window, GRAY, next_decode_button_rect)
