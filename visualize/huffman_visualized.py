@@ -14,7 +14,7 @@ INACTIVE_COLOR = (150, 150, 150)
 pygame.init()
 
 # Set up the window
-width, height = pygame.display.Info().current_w, pygame.display.Info().current_h
+width, height = pygame.display.Info().current_w, pygame.display.Info().current_h - 50
 # width, height = 1366, 768
 margin = 270
 window = pygame.display.set_mode((width, height))

@@ -1,6 +1,11 @@
 # Huffman-coding
-## Link báo cáo:
-https://www.overleaf.com/9939351869mmqryrcnsbjb
-
-## Link slide:
-https://www.canva.com/design/DAFfyhduKic/oRB5K50ea4paKGV_77wD0Q/edit?utm_content=DAFfyhduKic&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton
+## application
+- Phần mềm nén dựa trên lý thuyết 
+- Sử dụng ngôn ngữ C++
+## doc
+- Chứa file huffman_lythuyet.ipynb cho phần mã của lý thuyết
+- File Document.pdf cho bài báo cáo, đã bao gồm hướng dẫn sử dụng của các chương trình đính kèm
+## latex
+- Chứa source code latex để compile file Document.pdf
+## visualize
+- Sử dụng Pygame để mô phỏng hoạt động mã hóa và giải mã của Huffman
