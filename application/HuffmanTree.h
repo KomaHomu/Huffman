@@ -4,6 +4,8 @@
 #include <vector>
 #include "FileStructure.h"
 
+using namespace std;
+
 class HuffmanEntry;
 
 class HuffmanTree;
@@ -21,19 +23,18 @@ public:
 
     bool operator<(const HuffmanTree *other) const;
 
-    void toTable(const std::vector<bool> &code, std::vector<HuffmanEntry> &huffmanTables) const;
+    void toTable(const vector<bool> &code, vector<HuffmanEntry> &huffmanTables) const;
 
-    void flat(std::vector<bool> *code);
+    void flat(vector<bool> *code) const;
 
-    void leaf(std::vector<HuffmanTree*> &leafs);
+    void leaf(vector<HuffmanTree *> &leafs);
 
-    static HuffmanTree heapify(std::vector<bool> *code, std::vector<HuffmanEntry> &huffmanTables);
+    static HuffmanTree heapify(vector<bool> *code, vector<HuffmanEntry> &huffmanTables);
 };
 
 
-
 struct HuffmanEntry {
-    std::vector<bool> code{};
+    vector<bool> code{};
     HuffmanLeaf *huffmanLeaf{};
 };
 #endif //HFCOMPRESSOR_HUFFMANTREE_H

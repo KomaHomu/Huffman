@@ -6,6 +6,8 @@
 #include "FileStructure.h"
 #include "HuffmanTree.h"
 
+using namespace std;
+
 class FileIO {
 public:
     struct {
@@ -34,7 +36,7 @@ public:
 private:
     struct {
         FileInside *current{};
-        std::bitset<8> *data = new std::bitset<8>();
+        bitset<8> *data = new bitset<8>();
     };
 };
 

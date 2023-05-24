@@ -5,15 +5,18 @@
 
 #ifndef HFCOMPRESSOR_HUFFMANTREE_CPP
 #define HFCOMPRESSOR_HUFFMANTREE_CPP
+using namespace std;
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "misc-no-recursion"
 
-void HuffmanTree::toTable(const std::vector<bool> &code, std::vector<HuffmanEntry> &huffmanTables) const {
+void HuffmanTree::toTable(const vector<bool> &code, vector<HuffmanEntry> &huffmanTables) const {
     if (this->left != nullptr) {
-        std::vector<bool> code_copy = std::vector<bool>(code);
+        vector<bool> code_copy = vector<bool>(code);
         code_copy.push_back(false);
         this->left->toTable(code_copy, huffmanTables);
     }
     if (this->right != nullptr) {
-        std::vector<bool> code_copy = std::vector<bool>(code);
+        vector<bool> code_copy = vector<bool>(code);
         code_copy.push_back(true);
         this->right->toTable(code_copy, huffmanTables);
     }
@@ -28,11 +31,16 @@ void HuffmanTree::toTable(const std::vector<bool> &code, std::vector<HuffmanEntr
     }
 }
 
+#pragma clang diagnostic pop
+
 bool HuffmanTree::operator<(const HuffmanTree *other) const {
     return this->frequency < other->frequency;
 }
 
-void HuffmanTree::flat(std::vector<bool> *code){
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "misc-no-recursion"
+
+void HuffmanTree::flat(vector<bool> *code) const {
     if (this->left != nullptr) {
         code->push_back(false);
         this->left->flat(code);
@@ -43,7 +51,12 @@ void HuffmanTree::flat(std::vector<bool> *code){
     }
 }
 
-void HuffmanTree::leaf(std::vector<HuffmanTree*> &leafs) {
+#pragma clang diagnostic pop
+
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "misc-no-recursion"
+
+void HuffmanTree::leaf(vector<HuffmanTree *> &leafs) {
     if (this->left != nullptr) {
         this->left->leaf(leafs);
     }
@@ -55,7 +68,9 @@ void HuffmanTree::leaf(std::vector<HuffmanTree*> &leafs) {
     }
 }
 
-HuffmanTree HuffmanTree::heapify(std::vector<bool> *code, std::vector<HuffmanEntry> &huffmanTables) {
+#pragma clang diagnostic pop
+
+HuffmanTree HuffmanTree::heapify(vector<bool> *code, vector<HuffmanEntry> &huffmanTables) {
     HuffmanTree node = HuffmanTree();
     if (code->empty()) {
         return node;
@@ -77,10 +92,10 @@ HuffmanTree HuffmanTree::heapify(std::vector<bool> *code, std::vector<HuffmanEnt
             current = current->right;
         }
     }
-    std::vector<HuffmanTree*> leafs = std::vector<HuffmanTree*>();
+    vector<HuffmanTree *> leafs = vector<HuffmanTree *>();
     node.leaf(leafs);
     if (leafs.size() != huffmanTables.size()) {
-        throw std::runtime_error("HuffmanTree::heapify: leafs.size() != huffmanTables.size()");
+        throw runtime_error("HuffmanTree::heapify: leafs.size() != huffmanTables.size()");
     }
     for (int i = 0; i < leafs.size(); ++i) {
         leafs[i]->size = huffmanTables[i].huffmanLeaf->size;

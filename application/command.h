@@ -3,13 +3,18 @@
 
 #include <filesystem>
 #include <queue>
+#include <map>
 #include "FileIO.h"
-namespace fs = std::filesystem;
+#include <cstring>
+
+using namespace std;
+namespace fs = filesystem;
+
 class Command {
 
 public:
 
-    static void compress(char *path, char *compressPath);
+    static void compress(char *path, char *compressPath, int wordSize, float splitRate);
 
     static void extract(char *path, char *extractPath);
 
@@ -18,11 +23,17 @@ public:
     static void examine(char *path);
 
 private:
-    static void parseData(FileIO &fileIO, fs::recursive_directory_iterator &pathIterator);
+    static void parseDataCompress(fs::recursive_directory_iterator &pathIterator, int wordSize, float splitRate);
 
+    static void parseDataCompress(fs::path &entry, int wordSize, float splitRate);
 
-    static std::priority_queue<HuffmanTree> calc_freq_list(FileIO &fileIO);
+    static vector<HuffmanTree> calc_freq_list();
+
+    static void lzw_split(char *path, vector<unsigned long long> &res1,
+                          int wordSize, float splitRate, int time);
 };
 
-static unsigned long long size = 0;
+static unsigned long long fileSize = 0;
+static vector<string> dict = vector<string>();
+static vector<vector<unsigned long long>> res = vector<vector<unsigned long long>>();
 #endif //HFCOMPRESSOR_COMMAND_H

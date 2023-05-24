@@ -10,7 +10,8 @@
 #include <filesystem>
 #include <cstring>
 
-namespace fs = std::filesystem;
+using namespace std;
+namespace fs = filesystem;
 
 void FileIO::writeHeader() const {
     FILE *file = fopen(path, "wb");
@@ -38,7 +39,7 @@ void FileIO::writeHeader() const {
 
 void FileIO::generateTreeData() const {
     // flat the tree
-    std::vector<bool> code = std::vector<bool>();
+    vector<bool> code = vector<bool>();
     huffmanTreeRoot->flat(&code);
     fileStructure->huffmanByte->treePart = (unsigned char *) malloc(0);
     bool remaining = false;
@@ -49,7 +50,7 @@ void FileIO::generateTreeData() const {
         if (fileStructure->huffmanByte->offset == 0) {
             fileStructure->huffmanByte->partCount++;
             fileStructure->huffmanByte->treePart = (unsigned char *) realloc(fileStructure->huffmanByte->treePart,
-                                                                    fileStructure->huffmanByte->partCount);
+                                                                             fileStructure->huffmanByte->partCount);
             fileStructure->huffmanByte->treePart[fileStructure->huffmanByte->partCount -
                                                  1] = static_cast<unsigned char>(data->to_ulong());
             data->reset();
@@ -59,11 +60,11 @@ void FileIO::generateTreeData() const {
     if (remaining) {
         fileStructure->huffmanByte->partCount++;
         fileStructure->huffmanByte->treePart = (unsigned char *) realloc(fileStructure->huffmanByte->treePart,
-                                                                fileStructure->huffmanByte->partCount);
+                                                                         fileStructure->huffmanByte->partCount);
         fileStructure->huffmanByte->treePart[fileStructure->huffmanByte->partCount -
                                              1] = static_cast<unsigned char>(data->to_ulong());
     }
-    std::vector<HuffmanTree *> leafs = std::vector<HuffmanTree *>();
+    vector<HuffmanTree *> leafs = vector<HuffmanTree *>();
     huffmanTreeRoot->leaf(leafs);
     // generate leafs data
     fileStructure->huffmanLeaf = (HuffmanLeaf *) malloc(leafs.size());
@@ -74,13 +75,13 @@ void FileIO::generateTreeData() const {
     }
 }
 
-void FileIO::addFile(char* path) const {
+void FileIO::addFile(char *path) const {
     fs::path filePath = fs::path(path);
     if (!fs::exists(filePath)) {
-        throw std::runtime_error("File not found: " + std::string(path));
+        throw runtime_error("File not found: " + string(path));
     }
     if (fs::is_directory(filePath)) {
-        throw std::runtime_error("Path is a directory: " + std::string(path));
+        throw runtime_error("Path is a directory: " + string(path));
     }
     fileStructure->fileCount++;
     if (fileStructure->fileCount > 1) {
@@ -89,36 +90,37 @@ void FileIO::addFile(char* path) const {
             FILE *file = fopen(pathTempData, "wb");
             fwrite(&flushChar, sizeof(unsigned char), 1, file);
             fileStructure->dataLength++;
-            fileStructure->fileInside[fileStructure->fileCount-2].endByte++;
+            fileStructure->fileInside[fileStructure->fileCount - 2].endByte++;
             data->reset();
         }
     }
-    char* name = (char*) filePath.relative_path().c_str();
-    char* current_pos;
-    for (char* p = name; (current_pos = strchr(name, fs::path::preferred_separator)) != nullptr; *current_pos = ';');
+    char *name = (char *) filePath.relative_path().c_str();
+    char *current_pos;
+    for (char *p = name; (current_pos = strchr(name, fs::path::preferred_separator)) != nullptr; *current_pos = ';');
     fileStructure->fileInside = (FileInside *) realloc(fileStructure->fileInside, fileStructure->fileCount);
-    fileStructure->fileInside[fileStructure->fileCount-1].name = name;
-    fileStructure->fileInside[fileStructure->fileCount-1].pathSize = sizeof (fileStructure->fileInside[fileStructure->fileCount-1].name);
-    fileStructure->fileInside[fileStructure->fileCount-1].startByte = fileStructure->dataLength;
-    fileStructure->fileInside[fileStructure->fileCount-1].endByte = fileStructure->dataLength;
+    fileStructure->fileInside[fileStructure->fileCount - 1].name = name;
+    fileStructure->fileInside[fileStructure->fileCount - 1].pathSize = sizeof(fileStructure->fileInside[
+            fileStructure->fileCount - 1].name);
+    fileStructure->fileInside[fileStructure->fileCount - 1].startByte = fileStructure->dataLength;
+    fileStructure->fileInside[fileStructure->fileCount - 1].endByte = fileStructure->dataLength;
 }
 
 void FileIO::writeBitData(bool bit) const {
     FILE *file = fopen(pathTempData, "wb");
-    data->set(7 - fileStructure->fileInside[fileStructure->fileCount-1].offset, bit);
-    fileStructure->fileInside[fileStructure->fileCount-1].offset = (fileStructure->fileInside[fileStructure->fileCount-1].offset + 1) % 8;
-    if (fileStructure->fileInside[fileStructure->fileCount-1].offset == 0) {
+    data->set(7 - fileStructure->fileInside[fileStructure->fileCount - 1].offset, bit);
+    fileStructure->fileInside[fileStructure->fileCount - 1].offset =
+            (fileStructure->fileInside[fileStructure->fileCount - 1].offset + 1) % 8;
+    if (fileStructure->fileInside[fileStructure->fileCount - 1].offset == 0) {
         unsigned char flushChar = static_cast<unsigned char>(data->to_ulong());
         fwrite(&flushChar, sizeof(unsigned char), 1, file);
         data->reset();
         fileStructure->dataLength++;
-        fileStructure->fileInside[fileStructure->fileCount-1].endByte++;
+        fileStructure->fileInside[fileStructure->fileCount - 1].endByte++;
     }
 }
 
 
-
-void FileIO::flush() const{
+void FileIO::flush() const {
     writeHeader();
     // copy pathTempData to path
     FILE *file = fopen(path, "wba");
@@ -137,7 +139,7 @@ void FileIO::readHeader() const {
     int magicNumber;
     fread(&magicNumber, sizeof(int), 1, file);
     if (magicNumber != fileStructure->MAGIC_NUMBER) {
-        throw std::runtime_error("Error processing file: " + std::string(path));
+        throw runtime_error("Error processing file: " + string(path));
     }
     // read files info
     fread(&fileStructure->fileCount, sizeof(unsigned int), 1, file);
@@ -163,18 +165,18 @@ void FileIO::readHeader() const {
 }
 
 void FileIO::treeBuild() const {
-    std::vector<HuffmanEntry> huffmanTables = std::vector<HuffmanEntry>();
-    std::vector<bool> code = std::vector<bool>();
+    vector<HuffmanEntry> huffmanTables = vector<HuffmanEntry>();
+    vector<bool> code = vector<bool>();
     for (unsigned long i = 0; i < fileStructure->leafCount; ++i) {
         HuffmanEntry tmp = HuffmanEntry();
         tmp.huffmanLeaf = &fileStructure->huffmanLeaf[i];
         huffmanTables.push_back(tmp);
     }
-    std::bitset<8> tmp;
+    bitset<8> tmp;
     for (unsigned long i = 0; i < fileStructure->huffmanByte->partCount; ++i) {
-        tmp = std::bitset<8>(fileStructure->huffmanByte->treePart[i]);
+        tmp = bitset<8>(fileStructure->huffmanByte->treePart[i]);
         for (int j = 0; j < 8; ++j) {
-            code.push_back(tmp[7-j]);
+            code.push_back(tmp[7 - j]);
         }
     }
     for (int i = 0; i < fileStructure->huffmanByte->offset; ++i) {
@@ -183,4 +185,4 @@ void FileIO::treeBuild() const {
     *huffmanTreeRoot = HuffmanTree::heapify(&code, huffmanTables);
 }
 
-#endif //HUFFMAN_FILEIO_H
+#endif //HFCOMPRESSOR_FILEIO_CPP

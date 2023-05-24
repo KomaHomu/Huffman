@@ -14,14 +14,14 @@ class HuffmanLeaf;
 struct FileStructure {
     // header data
     const int MAGIC_NUMBER = 0x72; // Huffman -> Hf -> 72
-    unsigned int fileCount=0;
+    unsigned int fileCount = 0;
     FileInside *fileInside{};
     // tree data
     HuffmanByte *huffmanByte{};
     unsigned long leafCount{};
     HuffmanLeaf *huffmanLeaf{};
     // data
-    unsigned long long dataLength=0;
+    unsigned long long dataLength = 0;
     // char* dataPart{};
 };
 
