@@ -13,9 +13,9 @@ class HuffmanTree;
 class HuffmanTree {
 public:
     struct {
-        unsigned int size{};
+        unsigned int size = 0;
         char *dataPart{};
-        unsigned long frequency{};
+        unsigned long frequency = 0;
         struct HuffmanTree *right{};
         struct HuffmanTree *father{};
         struct HuffmanTree *left{};

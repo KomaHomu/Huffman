@@ -48,7 +48,7 @@ void Command::parseDataCompress(fs::recursive_directory_iterator &pathIterator, 
 
 void Command::parseDataCompress(fs::path &entry, int wordSize, float splitRate) {
     fileSize = file_size(entry);
-    string pathS = fs::proximate(absolute(entry));
+    string pathS = entry.filename();
     vector<unsigned long long> temp = vector<unsigned long long>();
     char *path = (char *) malloc(pathS.size());
     strcpy(path, pathS.c_str());
@@ -70,7 +70,7 @@ void Command::lzw_split(char *path, vector<unsigned long long> &res1, int wordSi
     if (wordSize > fileSize) {
         wordSize = (int) fileSize;
     }
-    int windowSize = 32;
+    int windowSize = 1024;
     string word;
 
     char *buffer = (char *) malloc(windowSize);
