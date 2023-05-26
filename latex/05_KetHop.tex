@@ -1,0 +1,292 @@
+\chapter[Kết hợp Huffman Coding với thuật toán LZW]{Kết hợp Huffman Coding với\\ thuật toán LZW}
+
+Với ý tưởng từ biến thể kết hợp của các thuật toán nhóm LZ và Huffman, ta sẽ xây dựng thuật toán kết hợp Huffman Coding với thuật toán LZW.
+
+\section{Các bước thuật toán}
+
+    \subsection{Mã hóa}
+        \begin{itemize}
+            \item {Phân chia bằng LZ}
+    
+            \begin{itemize}
+                \item Bước 1: Lấy từng kí tự.
+                \item Bước 2: Tạo một chuỗi mới gồm chuỗi a và kí tự vừa được lấy và kiểm tra chuỗi đó có trong từ điển chưa.
+                    \begin{itemize}
+                        \item[-] Nếu rồi thì gán chuỗi vừa rồi thành chuỗi a rồi chạy tiếp.
+                        \item[-] Nếu chưa, ta thêm vào mảng trả về chuỗi a, thêm chuỗi vừa rồi vào từ điển nếu nó nhỏ hơn kích thước từ điển và gán kí tự đang xét vào chuỗi a
+                    \end{itemize}
+                \item Bước 3: Thêm kí tự còn lại vào mảng encoded.
+            \end{itemize}
+            Do đặc trưng của LZ, nó sẽ tạo ra các chuỗi có độ dài tăng dần, có nhiều chuỗi là chuỗi con của 1 chuỗi khác trong dãy, vậy nên để tối ưu, chúng ta sẽ đệ quy để đảm bảo tỉ lệ 90\% đầu ra đạt kích thước yêu cầu. \\
+            Kết quả thu được là một mảng chứa các bộ kí tự. Các bộ này sẽ được gọi là từ.
+            \item Bước 2: Tính tần số xuất hiện của mỗi từ trong chuỗi cần mã hóa và tạo một danh sách các nút lá, mỗi nút lá chứa một từ và tần số của nó.
+            \item Bước 3: Sắp xếp danh sách các nút lá theo thứ tự tăng dần của tần số và lấy hai nút có tần số nhỏ nhất để tạo một nút cha mới, có giá trị bằng tổng tần số của hai nút con. Gán nhãn nút con trái là 0 và nút con phải là 1. Thêm nút cha vào danh sách và loại bỏ hai nút con khỏi danh sách.
+            \item Bước 4: Lặp lại bước 2 cho đến khi chỉ còn một nút duy nhất trong danh sách, đó là nút gốc của cây Huffman. Cây Huffman được xây dựng từ dưới lên bằng cách kết hợp các nút có tần số thấp nhất thành các nhánh mới.
+            \item Bước 5: Duyệt cây Huffman từ gốc đến lá để tạo mã cho mỗi từ. Mã của một ký tự là chuỗi các bit biểu diễn đường đi từ gốc đến lá chứa ký tự đó.
+            \item Bước 6: Mã hóa các từ chuỗi ban đầu bằng cách thay thế mỗi từ bằng mã tương ứng của nó. 
+            \item Bước 7: Sinh bảng Huffman. Giống như Huffman bình thường.
+            \item Bước 8: Trả về bảng Huffman và chuỗi đã được mã hóa.
+        \end{itemize}
+    \subsection{Giải mã}
+     \begin{itemize}
+            \item Bước 1: Tạo cây Huffman từ bảng Huffman.
+                \begin{itemize}
+                    \item Bước 1: Lấy số nút trên cây.
+                    \item Bước 2: Lấy thứ tự pre-order trên cây. Chiều dài mảng này luôn nhỏ hơn số nút là 1.
+                    \item Bước 3: Sinh cây, xét từ vị trí nút gốc:
+                        \begin{itemize}
+                            \item Gặp số 0, chúng ta sẽ thêm một cây con vào bên trái và xét tiếp tại nút này.
+                            \item Gặp số 1, ta quay lui cho tới khi nào gặp nút cha chưa có cây con phải thì thêm cây con phải và xét nút vừa thêm.
+                        \end{itemize}
+                    \item Bước 4: Lấy tất cả nút lá theo thứ tự pre-order và chèn các từ.
+                \end{itemize}
+            \item Bước 2: Giải mã chuỗi mã hóa bằng cách duyệt cây Huffman từ gốc đến lá theo từng bit trong chuỗi. Nếu bit là 0, chuyển sang nút con trái, nếu bit là 1, chuyển sang nút con phải. Khi gặp một nút lá, lấy từ trong nút lá và thêm vào chuỗi giải mã. Quay lại nút gốc và tiếp tục duyệt cho đến khi hết chuỗi mã hóa.
+        \end{itemize}
+\section{Cài đặt thuật toán}
+
+    \subsection{Cài đặt Node\_Block}
+        Chúng ta sẽ cài đặt Node tương tự như với thuật toán Huffman, tạo lớp kế thừa từ lớp \lstinline{Node}, \lstinline{Node_Block}  ở trên.
+\begin{lstlisting}[language=Python]
+class Node_Block(Node):
+    def to_table(self):
+        node = 0
+        tree = ''
+        char = []
+        if self.char is not None:
+            return 1, tree, [self.char]
+        else:
+            node_l, tree_l, char_l = self.left.to_table() if self.left is not None else (0, '', [])
+            node_r, tree_r, char_r = self.right.to_table() if self.right is not None else (0, '', [])
+            char = char_l + char_r
+            node = node_l + node_r + 1
+            if self.left is not None:
+                tree += '0' + tree_l
+            if self.right is not None:
+                tree += '1' + tree_r
+            return [node, tree, char]
+\end{lstlisting}
+
+\subsection{Encode}
+Tương tự như với thuật toán Huffman nhưng có một số chỉnh sửa để có thể hoạt động với list.
+    \subsubsection{lzw\_split: có hai tham số đầu vào là chuỗi kí tự và kích thước cho mỗi từ (ở đây mặc định 4 kí tự (128 bit))}
+        \begin{lstlisting}
+def lzw_split(input_string, word_size = 4, dictionary = None, rate=0.9):
+    if len(input_string) == 0 or input_string is None:
+        return []
+    if word_size > len(input_string):
+        word_size = len(input_string)
+    if dictionary is None:
+        dictionary = []
+    current_string = []
+    encoded = []
+
+    for char in input_string:
+        current_string_plus_char = current_string + [char]
+        if current_string_plus_char in dictionary:
+            current_string = current_string_plus_char
+        else:
+            encoded.append(current_string) if len(current_string) != 0 else None
+            if len(current_string) < word_size:
+                dictionary += [current_string_plus_char]
+            current_string = [char]
+    if current_string:
+        encoded.append(current_string)
+    ratio=0
+    for i in encoded:
+        if len(i) == word_size:
+            ratio += 1
+    if ratio < len(encoded) // 10 * int(rate * 10):
+        encoded = lzw_split(input_string, word_size, dictionary)
+    return encoded
+        \end{lstlisting}
+    \subsubsection{calc\_freq\_list: đếm tần số xuất hiện của các cụm ký tự trong chuỗi}
+        \begin{lstlisting}
+def calc_freq_list(data):
+    list_block = {}
+    for block in data:
+        subdata = ''.join(block)
+        if subdata in list_block:
+            list_block[subdata]['freq'] += 1
+        else:
+            list_block[subdata] = {
+                'freq' : 1,
+                'char' : block
+            }
+    return list_block
+        \end{lstlisting}    
+    \subsubsection{build\_tree\_list chuyển dữ liệu thành cây Huffman}
+         \begin{lstlisting}
+def build_tree_list(data):
+    list_block = calc_freq_list(data)
+    heap = []
+    for block in list_block.values():
+        heap.append(Node_Block(block['char'], block['freq']))
+    while len(heap) > 1:
+        heap.sort()
+        left = heap.pop(0)
+        right = heap.pop(0)
+        heap.append(Node_Block(left=left, right=right))
+    if heap[0].char is not None:
+        return Node_Block(left=heap[0])
+    return heap[0]
+        \end{lstlisting}
+    \subsubsection{tree\_to\_dict\_block: chuyển cây Huffman thành bảng mã}
+        \begin{lstlisting}
+def tree_to_dict_block(root):
+    def traverse(node, code):
+        if node is None:
+            return
+        elif node.char is not None:
+            return [[node.char, code]]
+        else:
+            return traverse(node.left, code + '0') + traverse(node.right, code + '1')
+    return traverse(root, '')
+        \end{lstlisting}
+    \subsubsection{encode\_block: chuyển dữ liệu thành chuỗi mã hóa và bảng mã}
+
+        \begin{lstlisting}
+def encode_block(data,word_size = 4):
+    split_block = lzw_split(data,word_size)
+    root = build_tree_list(split_block)
+    huffman_dict = tree_to_dict_block(root)
+    res = ''
+    for block in split_block:
+        for i in huffman_dict:
+            if i[0] == block:
+                res += i[1]
+
+    res = [word_size] + root.to_table() + [res]
+    return res
+        \end{lstlisting}
+
+\subsection{Decode}
+    Tương tự như thuật toán Huffman nhưng có một vài chỉnh sửa để có thể hoạt động với đoạn mã hóa mới được trả về.
+    \subsubsection{table\_to\_tree\_block: trả về mã tương ứng với cụm ký tự trong bảng mã}
+        \begin{lstlisting}
+def table_to_tree_block(code):
+    wordsize = code[0]
+    node = code[1] - 1# Lấy số nút trừ root
+    preorder=code[2] # Lấy preorder của cây
+    # Xây cây
+    root = Node()
+    current = root 
+    for i in range(len(preorder)):
+        if preorder[i] == '0':
+            current.left = Node()
+            current.left.father = current
+            current = current.left
+        elif preorder[i] == '1':
+            current = current.father
+            while current.right is not None:
+                current = current.father
+            current.right = Node()
+            current.right.father = current
+            current = current.right
+    # Chèn kí tự cho nút lá
+    leafs = root.leafs()
+    for i in range(len(leafs)):
+        if len(code[3][i]) > wordsize:
+            raise Exception('Invalid code')
+        leafs[i].char = code[3][i]
+    return root, code[-1]
+        \end{lstlisting}
+    \subsubsection{decode\_block: giải mã chuỗi mã hóa thành dữ liệu}
+        \begin{lstlisting}
+def decode_block(code, huffman_tree=None):
+    if huffman_tree is None:
+        huffman_tree, code = table_to_tree_block(code)
+    current = huffman_tree
+    data = ''
+    for c in code:
+        if c == '0':
+            current = current.left
+        elif c == '1':
+            current = current.right
+        if current.char is not None:
+            data += ''.join(current.char)
+            current = huffman_tree
+    return data
+        \end{lstlisting}
+
+\section{Đánh giá thuật toán}
+\subsubsection{Độ phức tạp về thời gian}
+    \begin{itemize}
+        \item Tính tần số xuất hiện của từng ký tự (list\_char): O(n)
+        \item Tạo ra danh sách các nút của cây: O(n)
+        \item Thuật toán LZW: O(n)
+        \item Tạo cây:
+            \begin{itemize}
+                \item Sắp xếp các nút con (thuật toán TimSort): O(nlogn)
+                \item Tạo nút con trái/phải: O(1)
+                \item Thêm một nút con mới: O(1) 
+            \end{itemize}
+    \end{itemize}
+    => Độ phức tạp về thời gian của thuật toán: O(nlogn)
+\subsubsection{Độ phức tạp về không gian}
+    \begin{itemize}
+        \item Tính tần số xuất hiện của từng ký tự (list\_char): O(n)
+        \item Tạo ra danh sách các nút của cây: O(n)
+        \item Thuật toán LZW: O(n)
+        \item Tạo cây:
+            \begin{itemize}
+                \item Sắp xếp các nút con (thuật toán TimSort): O(n)
+                \item Tạo nút con trái/phải: O(1)
+                \item Thêm một nút con mới: O(1)
+            \end{itemize}
+    \end{itemize}
+    => Độ phức tạp về không gian của thuật toán: O(n)
+
+\subsubsection{Đánh giá hiệu quả}
+
+Giờ dữ liệu sau khi mã hóa sẽ thêm 1 số nữa là kích thước của mỗi node sẽ lưu word size - $w$. Trong thực tế người ta không thể đọc từng byte môt sẽ mất rất nhiều thời gian, chúng ta còn có kích thước cửa số, một lần đọc file sẽ đọc số lượng byte nhất định cho nhanh, kích thước từ sẽ rất khác nhau.
+
+Để đơn giản hóa tính toán, chúng ta sẽ giả sử chia chuỗi được $m$ khối, các khối đều bằng nhau. Như vậy ta có độ dài sau khi mã hóa là $w + a + (o - 1) + f \times m \times w + e$
+
+Để thuật toán hiệu quả thì $(n - m \times w) \times f > a + w + (o - 1) + e$. Các tình huống xấu của thuật toán vẫn tương tự với trước khi cải tiến.
+
+Để thấy được kích thước tối đa mỗi node ảnh hưởng như thế nào, ta sẽ vẽ đồ thị. $a, w, f$ sẽ tạm tính 32 bit bới bộ dữ liệu là 30 lần đoạn văn. Chi tiết xem file đính kèm bài báo cáo
+
+Tại trục hoành Word Size = 0 là dữ liệu gốc, Word Size = 1 là dữ liệu né chỉ với mỗi Huffman, Word Size > 1 là dữ liệu được chia bằng LZW rồi mới nén
+
+\fig{image/04_G01.png}{Kết hợp với LZW}
+
+Ta thấy dữ liệu này có tính lặp lại cao nên sau khi nén, kích thước đã giảm rất nhiều, sau khi được chia với word size là 2, khối lượng dữ liệu đã nhỏ hơn 1 chút và từ đó điểm 3 trở về sau, kích thước bắt đầu to dần lên.
+
+Do đặc tính của LZW đã nói ở trên, chúng ta sẽ chạy lại cho đủ 90\%
+
+\fig{image/04_G02.png}{Kết hợp với LZW cải tiến}
+
+Điểm 1,2,3 thì không đổi còn 4 và 5 đã thấp hơn trước rất nhiều khi chia lại rất nhiều vậy nên, việc chia lại sẽ rất cần thiết khi dữ liệu lớn. Nhưng đây cũng là bài toán đánh đổi thời gian và hiệu suất
+
+Với mỗi dữ liệu, chúng ta sẽ cần 1 word size phù hợp. Word size càng nhỏ các tập sẽ càng lặp nhiều thì tần số của các block sẽ càng lớn. Còn nếu word size càng lớn thì các tập sẽ càng khác nhau thì tần số của các block sẽ càng thấp.
+
+Ta có bài toán tối ưu: Tìm $w$ sao cho $a + (o - 1) + \Sigma^m_{i=1}{l + w_i \times f} + e$ là nhỏ nhất với $w_i$ là kích thước từ của từng node và $l$ là số bit để lưu độ dài của $w_i$ và $w_i < w$. Bên cạnh đó trong thực tế, chúng ta còn phải tính thêm kích thước cửa sổ để có thể tăng tốc độ tính toán nhưng việc này cũng làm giảm hiệu suất nén của thuật toán
+
+Nhưng không, chưa ai giải được bài toán trên hết, muốn biết cỡ nào tốt nhất, hiện tại chúng ta phải thử. Các phần mềm sẽ cho chọn word size.
+
+Ví dụ: Phần mềm 7-Zip với mã hóa Deflate được kết hợp từ LZ77 và Huffman. Word size mặc định 32
+
+\fig{image/04_S00.png}{Deflate trong 7-Zip}
+
+Nêú chúng ta chọn Word size quá lớn, nén dữ liệu sẽ không còn hiệu quả nữa. Thử lại với đoạn 4 câu đầu của chuyện Kiều với thuật toán vừa xây dựng
+
+\begin{table}[H]
+    \fontsize{13}{18}\selectfont
+    \begin{center}
+      \begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}|>{\centering}m{0.5\linewidth}|>{\centering\arraybackslash}m{0.2\linewidth}|>{\centering\arraybackslash}m{0.2\linewidth}|}
+            \hline
+            \textbf{Dữ liệu} & \textbf{Kích thước} &  \textbf{Tỉ lệ nén} \\
+            \hline
+            Ban đầu & 4192 & - \\
+            \hline
+            Huffman & 2082 & 2.01\\
+            \hline
+            \makecell{Chia bằng LZW với kích thước từ là 2\\ Nén Huffman} & 4001 & 1.04\\
+            \hline
+            \makecell{Chia bằng LZW với kích thước từ là 3\\ Nén Huffman} & 4628 & 0.90\\
+            \hline
+      \end{tabular*}      
+      \caption[So sánh hiệu suất trước và sau kết hợp LZW]{Tổng hợp lại kết quả khi chạy Huffman kết hợp LZW}
+    \end{center}
+\end{table}
+Chúng ta khó có thể so sánh với thuật toán Deflate, chuẩn nén quốc tế bây giờ do nó sử dụng cả Bảng mã Huffman cố định và chỉ xây dựng Bảng mã Huffman linh động khi cần thiết đồng thời có các khối không được nén

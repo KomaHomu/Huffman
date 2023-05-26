@@ -1,0 +1,27 @@
+\chapter*{Giới thiệu}
+Nén dữ liệu, nhất là trong thời đại bùng nổ thông tin như hiện nay, trở thành một nhu cầu cần thiết thường nhật. Việc nén dữ liệu sẽ giúp chúng ta giảm được nguồn tài nguyên cũng như dung lượng lưu trữ, băng thông đường truyền.\\
+\indent{}Bên cạnh đó, các tệp tin văn bản thường hay có các kí tự xuất hiện nhiều lần, hình ảnh có thể có các vùng màu sắc không thay đổi trong nhiều pixel, các tập tin dạng âm thanh đã được số hóa cũng có thể có nhiều đoạn lặp lại nhiều lần... Những điều ấy dẫn đến việc dư thừa về dữ liệu và ta hoàn toàn có thể nén chúng lại mà không làm mất các thông tin.\\
+\indent{}Có rất nhiều phương pháp để nén dữ liệu, nhưng trong khuôn khổ, bài báo cáo sẽ chỉ đề cập đến thuật toán Huffman - một thuật toán nén cơ bản, dựa trên giải thuật tham lam trên cây nhị phân Huffman, bên cạnh đó là một số biến thể của nó. 
+
+\pagebreak
+
+\chapter{Dẫn nhập}
+% \cite{szemeredi1983extremal}.  % dùng cái này để trích nguồn
+
+\section{Ra đời}
+Thuật toán Huffman được đề xuất bởi David A. Huffman công bố năm 1952 trong bài báo "A Method for the Construction of Minimum - Redundancy Codes".
+\section{Ý tưởng}
+Samuel Morse vào giữa thế kỷ XIX đã phát minh ra mã điện báo. Trong đó, các chữ cái phổ biến như e ($.$) và a ($. -$) được gán các chuỗi dấu chấm và gạch ngang ngắn trong khi các chữ cái hiếm gặp như q ($- - . -$) và z ($- - . .$) có các biểu diễn dài hơn.\\
+\indent{} Huffman cũng gần giống vậy. Giả sử chúng ta phải mã hóa một đoạn văn bản gồm nhiều kí tự và mỗi kí tự được mã hóa bởi một dãy các bit gọi là codeword. Ta có thể dùng mã hóa với độ dài cố định như ASCII, mỗi ký tự được gán cho một xâu bit có cùng độ dài. Tuy nhiên, để kết quả xâu sau mã hóa ngắn hơn, ta sẽ mã hóa dựa trên tần suất xuất hiện các ký tự cần mã hóa, xuất hiện càng nhiều lần, codeword càng ngắn và ngược lại.
+
+\section{Mã tiền tố. Biểu diễn mã tiền tố trên cây nhị phân}
+Với ý tưởng trên, thay vì mã hóa với độ dài cố định (như ASCII là 8 bit), ta sẽ mã hóa với độ dài thay đổi. Khi đó, lại có vấn đề mới: Vậy khi giải mã làm thế nào phân biệt được xâu bít nào là mã hóa của ký hiệu nào? Một trong các giải pháp là dùng các dấu phẩy (",") hoặc một ký hiệu quy ước nào đó để tách từ mã của các ký tự đứng cạnh nhau. Nhưng như thế số các dấu phẩy sẽ chiếm một không gian đáng kể trong bảng mã. Vì vậy, ta cần đến khái niệm "mã tiền tố".\\
+\indent{} Mã tiền tố là bộ các từ mã của một tập hợp các ký hiệu sao cho từ mã của mỗi ký hiệu không là tiền tố (phần đầu) của từ mã một ký hiệu khác trong bộ mã ấy.\\
+\indent{} Ví dụ: : Giả sử mã hóa từ "ARRAY", tập các ký hiệu cần mã hóa gồm ba chữ cái "A","R","Y".\\
+\begin{itemize}
+    \item Nếu mã hóa bằng các từ mã có độ dài bằng nhau ta dùng ít nhất 2 bit cho một chữ cái chẳng hạn "A"=00, "R"=01, "Y"=10. Khi đó mã hóa của cả từ là 0001010010. Để giải mã ta đọc hai bit một và đối chiếu với bảng mã.
+    \item Nếu mã hóa "A"=0, "R"=01, "Y"=11 thì bộ từ mã này không là mã tiền tố vì từ mã của "A" là tiền tố của từ mã của "R". Để mã hóa cả từ ARRAY phải đặt dấu ngăn cách vào giữa các từ mã 0,01,01,0,11.
+    \item Nếu mã hóa "A"=0, "R"=10, "Y"=11 thì bộ mã này là mã tiền tố. Với bộ mã tiền tố này khi mã hóa xâu "ARRAY" ta có 01010011.
+\end{itemize}
+\indent{} Để có thể thực thi mã hóa Huffman trên máy tính, ta cần chọn một cấu trúc dữ liệu phù hơp để biểu diễn mã tiền tố, ta nghĩ đến cấu trúc cây. Ví dụ: Nếu có một cây nhị phân n lá ta có thể tạo một bộ mã tiền tố cho n ký hiệu bằng cách đặt mỗi ký hiệu vào một lá. Từ mã của mỗi ký hiệu được tạo ra khi đi từ gốc tới lá chứa ký hiệu đó, nếu đi sang nhánh trái thì ta thêm số 0, đi sang nhánh phải thì thêm số 1.\\
+\indent{} Ta sẽ đi cụ thể hơn về thuật toán Huffman (thiết kế và đánh giá) ở phần sau.

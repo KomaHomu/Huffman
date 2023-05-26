@@ -1,0 +1,36 @@
+\chapter{Trực quan hóa}
+\section{Hướng dẫn cài đặt và sử dụng Visualization}
+
+\subsubsection{Cài đặt}
+    \begin{itemize}
+        \item Tải thư mục chứa source code.
+        \item Visualization sử dụng thư viện pygame của python, vì thế trước khi chạy, ta cần cài thư viện pygame với lệnh: \lstinline{pip install pygame}
+    \end{itemize}
+\subsubsection{Sử dụng}
+Giao diện gồm các phím và nút lệnh:
+    \begin{itemize}
+        \item Generate String: Chạy với chuỗi khởi tạo là "Hello, World!".
+        \item Input Box: Tại đây chứa chuỗi cần mã hóa, có thể nhập chuỗi tùy ý sau đó nhấn Enter.
+        \item Next: Bước tiếp theo của thuật toán.
+        \item Previous: Bước trước đó của thuật toán.
+        \item Decode: Sau khi mã hóa hết chuỗi input sẽ xuất hiện nút Decode để giải mã. Bấm vào đây sẽ hiện nút Next trên màn hình để chạy từng bước giải mã.
+        \item Cuộn trang
+        \begin{itemize}
+            \item[-] Phím $\leftarrow$: dịch sang trái.
+            \item[-] Phím $\rightarrow$: dịch sang phải.
+            \item[-] Phím $\uparrow$: dịch xuống.
+            \item[-] Phím $\downarrow$: dịch lên.
+            \item[-] Phím Tab: Về đầu cây Huffman.
+            \item[-] Phím Space: Về cuối cây Huffman.
+            \item[-] Phím +: Tăng tốc độ cuộn.
+            \item[-] Phím -: Giảm tốc độ cuộn.
+        \end{itemize}
+        
+    \end{itemize}
+\subsubsection{Hình ảnh minh họa}
+    \fig{image/03_S00.png}{Giao diện mở đầu}
+    \fig{image/03_S01.png}{Minh họa quá trình dựng cây}
+    \fig{image/03_S02.png}{Kết quả sau khi hoàn thành dựng cây}
+    \fig{image/03_S03.png}{Minh họa quá trình giải mã}
+    \fig{image/03_S04.png}{Kết quả sau khi hoàn thành giải mã}
+

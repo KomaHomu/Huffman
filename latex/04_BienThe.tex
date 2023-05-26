@@ -1,0 +1,301 @@
+\chapter[Một số biến thể của Huffman Coding]{Một số biến thể\\ của Huffman Coding}
+\section{N-ary Huffman Coding}
+
+\subsubsection{Ý tưởng}
+
+ N-ary Huffman Coding là Huffman code sử dụng cấu trúc dữ liệu là cây n-ary (cây dữ liệu cho phép mỗi nút có tối đa n nút con, khác với Huffman cơ bản dùng cây nhị phân chỉ cho phép mỗi nút có tối đa hai nút con). 
+
+Ưu điểm: Có thể giảm độ dài đường dẫn trung bình (weighted path length) của cây Huffman, từ đó giảm số lượng bit cần thiết để mã hóa một ký hiệu; tăng tốc độ decode do giảm số lượng nhánh cần dự đoán trong quá trình duyệt cây.
+
+Nhược điểm: Khi tăng bậc của cây lên, số lượng bit cần thiết để biểu diễn một nút trong cây cũng tăng lên, do đó có thể làm tăng dung lượng lưu trữ.
+
+\subsubsection{Xây dựng cây n-ary Huffman và mã hóa: }
+
+Tương tự cách xây dựng cây nhị phân Huffman (trên thực tế, cây Huffman cơ bản là một trường hợp của n-ary Huffman tree với n=2), ta có các bước dựng cây như sau:
+\begin{itemize}
+    \item Sắp xếp các ký hiệu theo xác suất giảm dần.
+    \item Lấy n ký hiệu có xác suất thấp nhất và tạo một nút mới có chúng làm con. Xác suất của nút mới là tổng của xác suất của các con. Gán một mã khác nhau (0, 1,…, n - 1) cho mỗi nhánh.
+    \item Thay thế n ký hiệu bằng nút mới trong danh sách đã sắp xếp và sắp xếp lại danh sách theo xác suất.
+    \item Lặp lại các bước 2 và 3 cho đến khi chỉ còn một nút duy nhất, đó là gốc của cây.
+    \item Duyệt cây từ gốc đến mỗi lá và nối các mã trên đường đi để lấy mã cho mỗi ký hiệu.
+\end{itemize}
+
+\subsubsection{Giải mã}
+
+\begin{itemize}
+    \item Bắt đầu từ nút gốc của cây, đọc mỗi b bit của chuỗi mã hóa (b là số bit cần thiết để biểu diễn n, ví dụ b = 2 cho n = 4).
+    \item Duyệt nhánh tương ứng với bit đó và di chuyển đến nút con.
+    \item Nếu nút con là một nút lá, lấy ký tự trong nút lá và thêm vào chuỗi giải mã. Quay lại nút gốc và tiếp tục quá trình.
+    \item Nếu nút con không phải là một nút lá, thì tiếp tục đọc bit tiếp theo và lặp lại các bước trên cho đến khi hết chuỗi mã hóa.
+\end{itemize}
+
+\subsubsection{Cài đặt thuật toán}
+Ở đây sẽ triển khia với b = 2, mọi hàm đều gần như tương tự 
+\begin{itemize}
+    \item Ta sẽ tạo class \lstinline{Node4} kế thừa từ \lstinline{Node}, thay vì 2 biến để lưu cây con \lstinline{left} và \lstinline{right} thì ta dùng \lstinline{node00}, \lstinline{node01}, \lstinline{node10}, \lstinline{node11}
+\begin{lstlisting}[language=Python]
+class Node4(Node):
+    def __init__(self, char: str = None, freq: int = None, node00=None, node01=None, node10=None, node11=None, father=None):
+        if node00 is not None or node01 is not None or node10 is not None or node11 is not None:
+            self.char = None
+            self.freq = (node00.freq if node00 is not None else 0) + (node01.freq if node01 is not None else 0) + (node10.freq if node10 is not None else 0) + (node11.freq if node11 is not None else 0)
+            self.node00 = node00
+            self.node01 = node01
+            self.node10 = node10
+            self.node11 = node11
+            self.father = father
+            if node00 is not None:
+                node00.father = self
+            if node01 is not None:
+                node01.father = self
+            if node10 is not None:
+                node10.father = self
+            if node11 is not None:
+                node11.father = self
+        else:
+            self.char = char
+            self.freq = freq
+            self.node00 = None
+            self.node01 = None
+            self.node10 = None
+            self.node11 = None
+            self.father = father
+
+    def __str__(self):
+        return f'Node[({self.char}), node00: {self.node00}, node01: {self.node01}, node10: {self.node10}, node11: {self.node11}]'
+
+    def to_table(self):
+        node = 0
+        tree = ''
+        char = []
+        if self.char is not None:
+            return 1, tree, [self.char]
+        else:
+            node00, tree00, char00 = self.node00.to_table() if self.node00 is not None else (0, '', [])
+            node01, tree01, char01 = self.node01.to_table() if self.node01 is not None else (0, '', [])
+            node10, tree10, char10 = self.node10.to_table() if self.node10 is not None else (0, '', [])
+            node11, tree11, char11 = self.node11.to_table() if self.node11 is not None else (0, '', [])
+            char = char00 + char01 + char10 + char11
+            node = 1 + node00 + node01 + node10 + node11
+            if node00 > 0:
+                tree += '00' + tree00
+            if node01 > 0:
+                tree += '01' + tree01
+            if node10 > 0:
+                tree += '10' + tree10
+            if node11 > 0:
+                tree += '11' + tree11
+        return [node, tree, char]
+    def leafs(self):
+        if self.node00 is None and self.node01 is None and self.node10 is None and self.node11 is None:
+            return [self]
+        else:
+            return (self.node00.leafs() if self.node00 is not None else []) + (self.node01.leafs() if self.node01 is not None else []) + (self.node10.leafs() if self.node10 is not None else []) + (self.node11.leafs() if self.node11 is not None else [])
+\end{lstlisting}
+\item Nhóm hàm mã hóa
+\begin{itemize}
+    \item Hàm dựng cây
+\begin{lstlisting}[language=Python]
+def build_tree4(data):
+    list_char = calc_freq(data)
+    heap = []
+    for char, freq in list_char.items():
+        heap.append(Node4(char, freq))
+    while len(heap) >= 4:
+        heap.sort()
+        node00 = heap.pop(0)
+        node01 = heap.pop(0)
+        node10 = heap.pop(0)
+        node11 = heap.pop(0)
+        heap.append(Node4(node00=node00, node01=node01, node10=node10, node11=node11))
+    if len(heap) >= 3:
+        heap.sort()
+        node00 = heap.pop(0)
+        node01 = heap.pop(0)
+        node10 = heap.pop(0)
+        heap.append(Node4(node00=node00, node01=node01, node10=node10))
+    if len(heap) >= 2:
+        heap.sort()
+        node00 = heap.pop(0)
+        node01 = heap.pop(0)
+        heap.append(Node4(node00=node00, node01=node01))
+    if heap[0].char is not None:
+        node00 = heap.pop(0)
+        heap.append(Node4(node00=node00))
+    return heap[0]
+\end{lstlisting}
+\item Hàm chuyển cây sang từ điển
+\begin{lstlisting}[language=Python]
+def tree_to_dict4(root):
+    huffman_dict = {}
+    def traverse(node: Node4, code):
+        if node is None:
+            return
+
+        if node.char is not None:
+            huffman_dict[node.char] = code
+            return
+
+        traverse(node.node00, code + '00')
+        traverse(node.node01, code + '01')
+        traverse(node.node10, code + '10')
+        traverse(node.node11, code + '11')
+
+    traverse(root, '')
+    return huffman_dict
+\end{lstlisting}
+\item Hàm mã hóa
+\begin{lstlisting}[language=Python]
+def encode4(data):
+    root = build_tree4(data)
+    huffman_dict = tree_to_dict4(root)
+    res = ''
+    for char in data:
+        res += huffman_dict[char]
+    res = root.to_table() + [res]
+    return res
+\end{lstlisting}
+\end{itemize}
+\item Nhóm hàm giải mã
+\begin{itemize}
+    \item Chuyển mã thành cây
+\begin{lstlisting}[language=Python]
+def table_to_tree4(code):
+    node = code[0] - 1
+    preorder=code[1]
+    root = Node4()
+    current = root
+    for i in range(len(preorder)//2):
+        if preorder[i*2:i*2+2] == '00':
+            current.node00 = Node4()
+            current.node00.father = current
+            current = current.node00
+        elif preorder[i*2:i*2+2] == '01':
+            current = current.father
+            while current.node01 is not None:
+                current = current.father
+            current.node01 = Node4()
+            current.node01.father = current
+            current = current.node01
+        elif preorder[i*2:i*2+2] == '10':
+            current = current.father
+            while current.node10 is not None:
+                current = current.father
+            current.node10 = Node4()
+            current.node10.father = current
+            current = current.node10
+        elif preorder[i*2:i*2+2] == '11':
+            current = current.father
+            while current.node11 is not None:
+                current = current.father
+            current.node11 = Node4()
+            current.node11.father = current
+            current = current.node11
+    leafs = root.leafs()
+    for i in range(len(leafs)):
+        leafs[i].char = code[2][i]
+    return root, code[-1]
+\end{lstlisting}
+\item Giải mã
+\begin{lstlisting}[language=Python]
+def decode4(code, huffman_tree=None):
+    if huffman_tree is None:
+        huffman_tree, code = table_to_tree4(code)
+    current = huffman_tree
+    data = ''
+    for i in range(len(code)//2):
+        if code[i*2:i*2+2] == '00':
+            current = current.node00
+        elif code[i*2:i*2+2] == '01':
+            current = current.node01
+        elif code[i*2:i*2+2] == '10':
+            current = current.node10
+        elif code[i*2:i*2+2] == '11':
+            current = current.node11
+        if current.char is not None:
+            data += current.char
+            current = huffman_tree
+    return data
+\end{lstlisting}
+\end{itemize}
+\end{itemize}
+\subsubsection{So sánh giữa 2-ary(Huffman bình thường) và 4 ary}
+\begin{table}[H]
+  \fontsize{13}{18}\selectfont
+    \begin{center}
+      \begin{tabular*}{\linewidth}{@{}|>{\centering}m{0.59\linewidth}|>{\centering\arraybackslash}m{0.1\linewidth}|>{\centering\arraybackslash}m{0.1\linewidth}|>
+      {\centering\arraybackslash}m{0.1\linewidth}|}
+        \hline
+        \textbf{Đoạn kí tự} & \textbf{Trước khi nén} &  \textbf{Hiệu suất nén 2-ary} & \textbf{Hiệu suất nén 4-ary}\\
+        \hline
+        abcdefghiklmnopqrstuvwxyz & 800 & 0.8 & 0.78\\
+        \hline
+        aaaaaaaaaaaaaaa & 480 & 6 & 5\\
+        \hline
+        \makecell{Trăm năm trong cõi người ta,\\Chữ tài chữ mệnh khéo là ghét nhau.\\Trải qua một cuộc bể dâu,\\Những điều trông thấy mà đau đớn lòng.} & 4192 & 2.0 & 1.91\\
+        \hline
+      \end{tabular*}
+      \caption[So sánh hiệu suất 2-ary và 4-ary]{Tổng hợp lại kết quả khi chạy, mỗi kí tự 32 bit}
+    \end{center}
+  \end{table}
+Với bộ dữ liệu này, 4-ary có hiệu suất kém hơn Huffman bình thường.
+\section{Length-limited Huffman Coding} 
+\subsubsection{Ý tưởng:}
+
+Length-limited Huffman Coding (Mã hóa Huffman có giới hạn độ dài) là một biến thể của mã hóa Huffman, có giới hạn độ dài của mã hóa của mỗi từ, là thuật toán có độ phức tạp thời gian O(nL) và độ phức tạp không gian O(n), xây dựng mã Huffman tối ưu cho các kí tự có độ dài lưu trữ là $n$, mà ở đó, độ dài kí tự sau khi mã hóa không vượt quá $L$.
+
+Bằng cách giới hạn độ dài mã hóa của mỗi từ, ta có thể tránh các mã hóa quá dài khi có một số ký tự có xác suất xuất hiện rất thấp. Khi có sự khác biệt về chi phí truy cập giữa các cấp bộ nhớ, ví dụ như cache và RAM, giới hạn độ dài mã hóa của mỗi từ giúp giải mã nhanh và tiết kiệm hơn, dễ dàng phù hợp với các yêu cầu cụ thể cố định của các thiết bị phần cứng. Ngoài ra, việc sử dụng mã hóa của mỗi từ có độ dài giới hạn sẽ giúp giảm thiểu rủi ro khi có sai lệch về xác suất khi xây dựng cây/bảng Huffman trong trường hợp không biết chính xác xác suất của tập nguồn cần mã hóa.
+
+\subsubsection{Lịch sử phương pháp}
+
+Từ các lý thuyết về: xây dựng cây nhị phân có độ dài đường đi trọng số nhỏ nhất và độ dài đường đi tối đa bị hạn chế (của Hu \& Tan năm 1972); "Constructing codes with bounded codeword lengths" (của D. C. Van Voorhis năm 1974), năm 1990 Larmore và Hirschberg đề xuất mô hình "package-merge", thực thi ý tưởng trên một cách hiệu quả. "Package-merge" xây dựng các package (gói) ký hiệu, theo cách tương tự như thuật toán của Huffman, nhưng không mục nào có thể tham gia nhiều hơn $L$ bước kết hợp. Hạn chế đó được thực thi bằng cách tạo tất cả các cây con có chi phí thấp nhất có độ sâu tối đa khác nhau và giữ lại thông tin cho từng độ sâu nút có thể có trong một cấu trúc riêng biệt.
+
+\subsubsection{Package-merge}
+\begin{itemize}
+    \item Phương pháp package-merge có thể đưa về bài toán coin collector nhị phân.
+    \item Cách thuật toán hoạt động như sau:
+    \begin{itemize}
+        \item Giả sử bộ chữ cái cần mã hóa có n ký tự với tần suất $p1, p2, …, pn$ và độ dài tối đa của mỗi từ mã là $L$.
+        \item Tạo ra L đồng xu cho mỗi ký tự, với mệnh giá $2\sp{-1}, 2\sp{-2}, …, 2\sp{-L}$ và giá trị tiền tệ bằng với tần suất của ký tự đó.
+        \item Sắp xếp các đồng xu theo thứ tự tăng dần của giá trị tiền tệ và mệnh giá.
+        \item Package (Gói) các đồng xu có mệnh giá nhỏ nhất thành các cặp, bắt đầu từ cặp có tổng giá trị tiền tệ nhỏ nhất. Nếu có một đồng xu còn thừa, nó sẽ là đồng xu có giá trị tiền tệ cao nhất của mệnh giá đó, và nó sẽ bị bỏ qua. Mỗi cặp được coi như một gói có mệnh giá bằng tổng mệnh giá của hai đồng xu trong cặp và giá trị tiền tệ bằng tổng giá trị tiền tệ của hai đồng xu trong cặp.
+        \item Merge (Hợp nhất) các gói vừa tạo với danh sách các đồng xu có mệnh giá kế tiếp, lại theo thứ tự tăng dần của giá trị tiền tệ và mệnh giá. Các phần tử trong danh sách này cũng được gói thành các cặp và hợp nhất với danh sách kế tiếp, và cứ tiếp tục như vậy.
+        \item Cuối cùng, sẽ có một danh sách các phần tử, mỗi phần tử là một đồng xu có mệnh giá 1 hoặc một gói gồm hai hoặc nhiều đồng xu có tổng mệnh giá bằng 1. Chúng cũng được sắp xếp theo thứ tự tăng dần của giá trị tiền tệ.
+        \item Chọn ra $n - 1$ phần tử có giá trị tiền tệ nhỏ nhất trong danh sách cuối cùng. Gọi $hi$ là số lượng phần tử có giá trị tiền tệ $pi$ được chọn. Mã Huffman có giới hạn độ dài tối ưu sẽ mã hóa ký tự $i$ với một chuỗi bit có độ dài $hi$
+    \end{itemize}
+\end{itemize}
+
+
+\section{Kết hợp của các thuật toán nhóm LZ và Huffman}
+
+\subsubsection{Ý tưởng:}
+
+Nếu như chuỗi cần nén có ít chữ cái như một chuỗi bit chẳng hạn, việc nén bằng Huffman sẽ làm tăng dung lượng cho việc lưu cây và các node. Hay trong một chuỗi có nhiều từ giống nhau, chỉ cần một đoạn bit, chúng ta có thể biểu diễn được cả một từ nhiều kí tự.
+
+Vậy nên tham lam hơn, thay vì chọn một ký tự, ta có thể chọn một cụm ký tự. Đây là lý do họ thuật toán nén LZ (Lempel-Ziv) kết hợp cùng với Huffman. Nhóm LZ chia dữ liệu thành các khối rất hiệu quả.
+
+Điển hình là thuật toán Deflate cùng các thuật toán tương tự phổ biến như zstd, LZX, Brotli, ... Hiện nay chuẩn nén quốc tế được quy định trong RFC của IETF để truyền tải dữ liệu sẽ sử dụng hai chuẩn chính là Deflate (RFC1951 - 5/1966) và Brotli (RFC 7932 - 7/2016) bởi hiệu suất cũng như tốc độ của nó.
+
+\subsubsection{Mô hình:}
+\fig{image/04_G00.png}{Mô hình khi kết hợp LZ với Huffman}
+
+\subsubsection{Cấu trúc của Deflate}
+Nén DEFLATE có sự linh hoạt lớn trong việc nén dữ liệu. Dữ liệu được chia thành các khối. 
+Ở header mỗi khối được biểu diễn như sau:
+\begin{itemize}
+    \item 1 bit biểu diễn còn khối đằng sau không.
+    \item 2 bit biểu diễn chế độ nén của khối.
+    \item 2 bit độ dài khối.
+    \item đệm bit cho đủ 1 byte.
+\end{itemize}
+Deflate có ba chế độ nén mà bộ nén có sẵn:
+\begin{itemize}
+    \item Không nén ứng với mã 00.
+    \item Nén trước với LZ77 và sau đó với mã hóa Huffman sử dụng cây được định nghĩa bởi thông số Deflate ứng với mã 01.
+    \item Nén trước với LZ77 và sau đó với mã hóa Huffman sử dụng cây do bộ nén tạo ra ứng với mã 10.
+\end{itemize}
+Đối với khối sử dụng cây do bộ nén tạo ra, bộ nén sẽ sẽ lưu hai cây vào phần dữ liệu của khối:
+\begin{itemize}
+    \item Cây đầu tiên để ánh xạ bảng chữ cái và độ dài trùng lặp của con trỏ LZ77.
+    \item Cây thứ hai cho khoảng cách lùi của con trỏ LZ77.
+\end{itemize}

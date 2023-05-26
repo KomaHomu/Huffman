@@ -1,0 +1,393 @@
+\chapter{Thuật toán Huffman}
+
+\section{Phát biểu bài toán} 
+
+Cho tập A các ký hiệu và trọng số (tần suất xuất hiện) của chúng. Tìm một bộ mã tiền tố với tổng độ dài mã hóa là nhỏ nhất.
+
+\section{Giải thuật trong thuật toán Huffman}
+
+Thuật toán Huffman là một ví dụ của giải thuật tham lam. Nó được gọi là tham lam, vì hai nút nhỏ nhất được lựa chọn tại mỗi bước, và kết quả quyết định này là cục bộ trong một cây mã hóa tối ưu trên toàn cục.
+
+\section{Các bước thực hiện thuật toán Huffman}
+
+    \subsection{Mã hóa}
+
+        \begin{itemize}
+            \item Bước 1: Tính tần số xuất hiện của mỗi ký tự trong chuỗi cần mã hóa và tạo một danh sách các nút lá, mỗi nút lá chứa một ký tự và tần số của nó.
+            \item Bước 2: Sắp xếp danh sách các nút lá theo thứ tự tăng dần của tần số và lấy hai nút có tần số nhỏ nhất để tạo một nút cha mới, có giá trị bằng tổng tần số của hai nút con. Gán nhãn nút con trái là 0 và nút con phải là 1. Thêm nút cha vào danh sách và loại bỏ hai nút con khỏi danh sách.
+            \item Bước 3: Lặp lại bước 2 cho đến khi chỉ còn một nút duy nhất trong danh sách, đó là nút gốc của cây Huffman. Cây Huffman được xây dựng từ dưới lên bằng cách kết hợp các nút có tần số thấp nhất thành các nhánh mới.
+            \item Bước 4: Duyệt cây Huffman từ gốc đến lá để tạo mã cho mỗi ký tự. Mã của một ký tự là chuỗi các bit biểu diễn đường đi từ gốc đến lá chứa ký tự đó. Tập hợp này được gọi là bảng Huffman. Ví dụ, nếu đường đi từ gốc đến lá chứa ký tự a là 0-1-0-1, thì mã của a là 0101.
+            \item Bước 5: Mã hóa chuỗi ban đầu bằng cách thay thế mỗi ký tự bằng mã tương ứng của nó. Ví dụ, nếu chuỗi ban đầu là "abac" và mã của a là 0, b là 10, c là 11, thì chuỗi mã hóa là "010011".
+            \item Bước 6: Sinh bảng Huffman:
+                \begin{itemize}
+                    \item Bước 1: Duyệt cây và biểu diển theo dạng pre-order. Nút trái biểu diễn bằng 0, nút phải biểu diễn bằng 1.
+                    \item Bước 2: Đếm số nút trên cây trừ nút gốc.
+                    \item Bước 3: Tại các nút lá ta lưu lại kí tự theo pre-order. \\
+                    Giả sử có cây Root[Left: [Node a] Right [Node Left[Node b] Right[Node c]] thì số nút sẽ là 5. Thứ tự duyệt cây post-prefix không tính nút gốc là 0101, danh sách nút lá là abc. Thường cả đoạn này sẽ được chuyển sang nhị phân.
+                \end{itemize}
+            \item Bước 7: Trả về bảng Huffman và chuỗi đã được mã hóa.
+        \end{itemize}
+
+    \subsection{Giải mã}
+
+        \begin{itemize}
+            \item Bước 1: Tạo cây Huffman từ bảng Huffman.
+                \begin{itemize}
+                    \item Bước 1: Lấy số nút trên cây.
+                    \item Bước 2: Lấy thứ tự pre-order trên cây. Chiều dài mảng này luôn nhỏ hơn số nút là 1.
+                    \item Bước 3: Sinh cây, xét từ vị trí nút gốc:
+                        \begin{itemize}
+                            \item Gặp số 0, chúng ta sẽ thêm một cây con vào bên trái và xét tiếp tại nút này.
+                            \item Gặp số 1, ta quay lui cho tới khi nào gặp nút cha chưa có cây con phải thì thêm cây con phải và xét nút vừa thêm.
+                        \end{itemize}
+                    \item Bước 4: Lấy tất cả nút lá theo thứ tự pre-order và chèn các kí tự.
+                \end{itemize}
+            \item Bước 2: Giải mã chuỗi mã hóa bằng cách duyệt cây Huffman từ gốc đến lá theo từng bit trong chuỗi. Nếu bit là 0, chuyển sang nút con trái, nếu bit là 1, chuyển sang nút con phải. Khi gặp một nút lá, lấy ký tự trong nút lá và thêm vào chuỗi giải mã. Quay lại nút gốc và tiếp tục duyệt cho đến khi hết chuỗi mã hóa. \\
+            Ví dụ, để giải mã chuỗi "010011", ta bắt đầu từ gốc và đi theo các bit như sau: 0 -> trái -> a, 1 - phải -> 0 - trái -> b, 0 - trái -> a, 1 - phải -> 1 - phải -> c. Chuỗi giải mã là "abac".
+        \end{itemize}
+
+\section{Tính đúng đắn của giải thuật tham lam Huffman}
+
+Để chứng minh thuật toán tham lam Huffman là đúng, ta chỉ ra rằng bài toán xác định mã tiền tố tối ưu thể hiện lựa chọn tham lam và những tính chất cấu trúc con tối ưu cục bộ. \\
+
+\subsubsection{Bổ đề 1} Cho bảng ký tự $C$ mà mỗi ký tự $c \in C$ có tần số là $f[c]$, chiều sâu là $dT(c)$. Cho $x$ và $y$ là hai ký tự trong $C$ có tần số thấp nhất. Tồn tại mã tiền tố tối ưu đối với $C$ mà trong đó từ mã của $x$ và $y$ có cùng chiều dài và chỉ khác duy nhất ở bit cuối cùng. \\
+
+\textbf{Chứng minh:}
+
+Cho hai ký tự $a$ và $b$ là các lá anh em ruột có chiều sâu cực đại trong $T$. Không mất tính tổng quát, ta mặc nhận rằng $f[a] \leq f[b]$ và $f[x] \leq f[y]$. Vì $f[x]$, $f[y]$ lần lượt là hai tần số của lá thấp nhất và $f[a]$, $f[b]$ là các tần số tùy ý theo thứ tự nên ta có: $f[x] \leq f[a]$ và $f[y] \leq f[b]$.
+
+Ta tráo đổi các vị trí trong T của $a$ và $x$ để tạo ra cây mới $T'$. Sau đó, ta tráo đổi vị trí của $b$ và $y$ trong cây $T'$ để tạo ra cây mới $T''$. Trong cây tối ưu $T$, các lá $a$ và $b$ là các lá sâu nhất và là anh em ruốt với nhau. Các lá $x$ và $y$ là hai lá mà giải thuật Huffman kết hợp với nhau đầu tiên, chúng xuất hiện ở các vị trí tùy ý trên cây $T$. Trao đổi các lá $a$ và $x$ để thu được cây $T'$. Sau đó, trao đổi các lá $b$ và $y$ để thu được cây $T''$. Bởi vì mỗi lần trao đổi không làm tăng mức phí, dẫn đến cây $T''$ cũng là cây tối ưu.
+
+Ta có: $f[a] - f[x]$ và $dT(a) - dT(x)$ là không âm. $f[a] - f[x]$ là không âm vì $x$ là lá có tần số cực tiểu và $dT(a) - dT(x)$ là không âm vì $a$ là lá có chiều sâu cực đại trên $T$. Việc trao đổi $a$ và $b$ với $x$ và $y$ không làm tăng mức hao phí và $B(T') - B(T'')$ là không âm. Dẫn đến $B(T'') \leq B(T)$ và vì $T$ là tối ưu nên $B(T) \leq B(T'')$, suy ra $B(T) = B(T'')$. Vì vậy, $T''$ là cây tối ưu trong đó $x$ và $y$ xuất hiện như những lá anh em ruột có chiều sâu cực đại. \\
+
+\subsubsection{Bổ đề 2:} Cho bảng ký tự $C$ mà mỗi ký tự $c \in C$ có tần số là $f[c]$. Cho $x$ và $y$ là hai ký tự trong $C$ có tần số thấp nhất. Nếu $T'$ là mã tiền tố tối ưu của $C' = C\setminus\{x,y\} \cup \{z\}$ với $f[z] = f[x] + f[y]$ thì $T$ là mã tiền tố tối ưu của $C$. \\
+
+\textbf{Chứng minh:}
+
+Ta chứng minh bổ đề bằng phản chứng.
+
+Giả sử cây $T$ biểu diễn mã tiền tố không tối ưu cho $C$. Tồn tại một cây $T''$ sao cho $B(T'') \leq B(T)$. Không mất tính tổng quát (theo Bổ đề 1), $T''$ có $x$ và $y$ là anh em ruột. Cho cây $T'''$ là cây $T''$ với nút cha của $x$ và $y$ được thay thế bằng nút $z$ có tần số $f[z] = f[x] + f[y]$. Điều này dẫn đến mâu thuẫn với giả thiết $T'$ biểu diễn mã tiền tố tối ưu cho $C'$. Vì vậy, $T$ phải biểu diễn mã tiền tố tối ưu cho $C$. \\
+
+\subsubsection{Chứng minh tính đúng đắn của giải thuật tham lam Huffman:}
+
+\begin{itemize}
+    \item Trường hợp cơ sở: $|C| = 2$.
+    \item Giả thiết quy nạp: Giả sử thuật toán Huffman đúng với mọi $|C| < n$.
+    \item Bước quy nạp: Xét trường hợp $|C| = n$. Theo thuật toán Huffman, ta quy bài toán về bài toán dựng mã tiền tố tối ưu $T'$ cho $C'$ trong đó $|C'| = n-1$. Theo giả thiết quy nạp, $T'$ là mã tiền tố tối ưu cho $C'$. Vậy $T$ là mã tiền tố tối ưu cho $C$ (theo Bổ đề 2).
+\end{itemize}
+
+\section{Cài đặt thuật toán Huffman}
+
+    \subsection{Cài đặt Node}
+        \begin{itemize}
+            \item Node là một nút trong cây Huffman gồm 4 thuộc tính:
+                \begin{itemize}
+                    \item char: ký tự của nút, tổng quát hơn là từ (word) lưu trong nút, mặc định là None. Nếu nút là nút lá thì char sẽ là ký tự của nút, nếu nút là nút cha thì char sẽ là None (kích thước của nó được gọi là word size).
+                    \item freq: tần số xuất hiện của ký tự, mặc định là None. Nếu nút là nút lá thì freq sẽ là tần số của ký tự, nếu nút là nút cha thì freq sẽ là tổng tần số của các nút con.
+                    \item left: nút con trái.
+                    \item right: nút con phải.
+                \end{itemize}
+            \item Các hàm trong Node:
+                \begin{itemize}
+                    \item \lstinline{__init__}: khởi tạo một nút mới, đã được cài đặt để thỏa mãn các yêu cầu trên.
+                    \item Bộ hàm so sánh \lstinline{__lt__}, \lstinline{__eq__}, \lstinline{__gt__},     \lstinline{__le__}, \lstinline{__ge__}: so sánh tần số của hai nút.
+                    \item \lstinline{__str__}, \lstinline{__repr__}: trả về chuỗi mô tả nút.
+                    \item \lstinline{to_bit}: trả về ba đối tượng.
+                        \begin{enumerate}
+                            \item Số nút.
+                            \item Cây Huffman nhị phân, biểu diễn dưới dạng Preorder bit.
+                            \item Các lá Bảng Huffman.
+                        \end{enumerate}
+                    \item \lstinline{leaf}: trả về danh sách các lá của cây.
+                \end{itemize}
+            \end{itemize}
+\begin{lstlisting}[language=Python]
+class Node:
+    def __init__(self, char: str = None, freq: int = None, left=None, right=None, father=None):
+        if left is not None or right is not None:
+            self.char = None
+            self.freq = (left.freq if left is not None else 0) + (right.freq if right is not None else 0)
+            self.left = left
+            self.right = right
+            self.father = father
+            if left is not None:
+                left.father = self
+            if right is not None:
+                right.father = self
+        else:
+            self.char = char
+            self.freq = freq
+            self.left = None
+            self.right = None
+            self.father = father
+
+    def __lt__(self, other):
+        return self.freq < other.freq
+
+    def __eq__(self, other):
+        return self.freq == other.freq
+
+    def __gt__(self, other):
+        return self.freq > other.freq
+
+    def __le__(self, other):
+        return self.freq <= other.freq
+
+    def __ge__(self, other):
+        return self.freq >= other.freq
+
+    def __str__(self):
+        return f'Node[({self.char}), left: [{self.left}], right: [{self.right}]]'
+    def __repr__(self):
+        return str(self)
+
+    def to_table(self):
+        node = 0
+        tree = ''
+        char = []
+        if self.char is not None:
+            return 1, tree, [self.char]
+        else:
+            node_l, tree_l, char_l = self.left.to_table() if self.left is not None else (0, '', [])
+            node_r, tree_r, char_r = self.right.to_table() if self.right is not None else (0, '', [])
+            char = char_l + char_r
+            node = node_l + node_r + 1
+            if self.left is not None:
+                tree += '0' + tree_l
+            if self.right is not None:
+                tree += '1' + tree_r
+            return [node, tree, char]
+    def leafs(self):
+        if self.left is None and self.right is None:
+            return [self]
+        else:
+            return (self.left.leafs() if self.left is not None else []) + (self.right.leafs() if self.right is not None else [])
+\end{lstlisting}
+
+\subsection{Encode}
+
+    \subsubsection{freq: đếm tần số xuất hiện của các ký tự trong chuỗi}
+
+\begin{lstlisting}[language=Python]
+def calc_freq(data):
+    list_char = {}
+    for char in data:
+        if char in list_char:
+            list_char[char] += 1
+        else:
+            list_char[char] = 1
+    return list_char
+\end{lstlisting}
+
+\subsubsection{build\_tree: chuyển dữ liệu thành cây Huffman}
+
+\begin{lstlisting}[language=Python]
+def build_tree(data):
+    list_char = calc_freq(data)
+    heap = []
+    for char, freq in list_char.items():
+        heap.append(Node(char, freq))
+    while len(heap) > 1:
+        heap.sort()
+        left = heap.pop(0)
+        right = heap.pop(0)
+        heap.append(Node(left=left, right=right))
+    if heap[0].char is not None:
+        return Node(left=heap[0])
+    return heap[0]
+\end{lstlisting}
+
+\subsubsection{tree\_to\_dict: chuyển cây Huffman thành bảng mã}
+
+\begin{lstlisting}[language=Python]
+def tree_to_dict(root):
+    huffman_dict = {}
+    def traverse(node, code):
+        if node is None:
+            return
+
+        if node.char is not None:
+            huffman_dict[node.char] = code
+            return
+
+        traverse(node.left, code + '0')
+        traverse(node.right, code + '1')
+
+    traverse(root, '')
+    return huffman_dict
+\end{lstlisting}
+
+\subsubsection{encode: chuyển dữ liệu thành chuỗi mã hóa và bảng mã}
+
+\begin{itemize}
+    \item Bước 1: Dựng cây Huffman từ dữ liệu.
+    \item Bước 2: Chuyển cây Huffman thành bảng mã.
+    \item Bước 3: Duyệt dữ liệu, mã hóa từng ký tự.
+\end{itemize}
+
+\begin{lstlisting}[language=Python]
+def encode(data):
+    root = build_tree(data)
+    huffman_dict = tree_to_dict(root)
+    res = ''
+    for char in data:
+        res += huffman_dict[char]
+    res = root.to_table() + [res]
+    return res
+\end{lstlisting}
+
+\subsection{Decode}
+
+\subsubsection{table\_to\_tree: chuyển bảng mã thành cây Huffman}
+
+\begin{lstlisting}[language=Python]
+def table_to_tree(code):
+    node = code[0] - 1# Lấy số nút trừ root
+    preorder=code[1] # Lấy preorder của cây
+    # Xây cây
+    root = Node()
+    current = root
+    for i in range(len(preorder)):
+        if preorder[i] == '0':
+            current.left = Node()
+            current.left.father = current
+            current = current.left
+        elif preorder[i] == '1':
+            current = current.father
+            while current.right is not None:
+                current = current.father
+            current.right = Node()
+            current.right.father = current
+            current = current.right
+    # Chèn kí tự cho nút lá
+    leafs = root.leafs()
+    for i in range(len(leafs)):
+        leafs[i].char = code[2][i]
+    return root, code[-1]
+\end{lstlisting}
+
+\subsubsection{decode: giải mã chuỗi mã hóa thành dữ liệu}
+
+\begin{itemize}
+    \item Bước 1: Chuyển bảng mã thành cây Huffman.
+    \item Bước 2: Duyệt chuỗi mã hóa, để đi đến vị trí đích của ký tự trong cây Huffman.
+    \item Bước 3: Lấy ký tự tại vị trí đích.
+    \item Bước 4: Về nút gốc và lặp lại cho đến khi duyệt hết chuỗi mã hóa.
+\end{itemize}
+
+\begin{lstlisting}[language=Python]
+def decode(code, huffman_tree=None):
+    if huffman_tree is None:
+        huffman_tree, code = table_to_tree(code)
+    current = huffman_tree
+    data = ''
+    for c in code:
+        if c == '0':
+            current = current.left
+        elif c == '1':
+            current = current.right
+        if current.char is not None:
+            data += current.char
+            current = huffman_tree
+    return data
+\end{lstlisting}
+
+\section{Đánh giá thuật toán}
+\subsubsection{Độ phức tạp về thời gian}
+    \begin{itemize}
+        \item Tính tần số xuất hiện của từng ký tự (list\_char): O(n)
+        \item Tạo ra danh sách các nút của cây: O(n)
+        \item Tạo cây:
+            \begin{itemize}
+                \item Sắp xếp các nút con (thuật toán TimSort): O(nlogn)
+                \item Tạo nút con trái/phải: O(1)
+                \item Thêm một nút con mới: O(1) 
+            \end{itemize}
+    \end{itemize}
+    => Độ phức tạp về thời gian của thuật toán: O(nlogn)
+\subsubsection{Độ phức tạp về không gian}
+    \begin{itemize}
+        \item Tính tần số xuất hiện của từng ký tự (list\_char): O(n)
+        \item Tạo ra danh sách các nút của cây: O(n)
+        \item Tạo cây:
+            \begin{itemize}
+                \item Sắp xếp các nút con (thuật toán TimSort): O(n)
+                \item Tạo nút con trái/phải: O(1)
+                \item Thêm một nút con mới: O(1)
+            \end{itemize}
+    \end{itemize}
+    => Độ phức tạp về không gian của thuật toán: O(n)
+    
+\subsubsection{Độ hiệu quả của thuật toán}
+
+Đối với các thuật toán nén, hiệu quả của thuật toán được tính bằng tỉ số nén. Tỉ số nén được tính bằng kích thước dữ liệu trước khi nén chia cho kích thước dữ liệu sau khi nén.
+
+Giả sử một chuỗi $n$ kí tự, mỗi kí tự được biểu diễn bằng đoạn mã có độ dài cố định $f$ bit. Như vậy độ dài trước khi mã hóa là $f \times n$ bit.
+
+Sau khi dựng xong cây Huffman, thu được một cây Huffman có $o$ node, số này sẽ được biểu diễn bằng a bit, cùng $m$ nút lá chứa các kí tự. Đoạn mã hóa sẽ được thể hiện bằng $e$ bit. Như vậy, theo đoạn mã thể hiện cài đặt của Huffman độ dài sau khi mã hóa là $a + (o - 1) + f \times m + e$ bit.
+
+Để thuật toán hiệu quả thì $(n - m) \times f > a + (o - 1) + e$.
+
+Từ đó ta có có hai tình huống xấu:
+\begin{itemize}
+    \item $f < \frac{a + (o - 1) + e}{n - m}$, khi đó sẽ có những kí tự phải biểu diễn bằng số bit lớn hơn ban đầu. Nếu $n$ đủ lớn chuỗi vẫn sẽ nén được.
+    \item $n \approx m$, phình thêm $a + (o - 1) + e$ bit do tần suất xuất hiện thấp, xấu nhất n = m.
+\end{itemize}
+
+\textbf{Trường hợp 1:} 
+
+Giả sử ta mã hóa chuỗi '1234567890' và các chuỗi được lặp lại nhiều lần của nó. Mỗi kí tự sẽ tính 5 bit, $a = 5$.
+
+\begin{table}[H]
+  \fontsize{13}{18}\selectfont
+    \begin{center}
+      \begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}|>{\centering}m{0.1\linewidth}|>{\centering\arraybackslash}m{0.4\linewidth}|>{\centering\arraybackslash}m{0.4\linewidth}|}
+        \hline
+        \textbf{Số lần lặp} & \textbf{Trước khi nén} &  \textbf{Sau khi nén} \\
+        \hline
+        2 & 100 & 141 \\
+        \hline
+        4 & 200 & 209\\
+        \hline
+        5 & 250 & 243\\
+        \hline
+      \end{tabular*}
+      \caption[So sánh hiệu suất trường hợp 1]{Tổng hợp lại kết quả khi chạy với mỗi kí tự 5 bit}
+    \end{center}
+  \end{table}
+Ta thấy lặp lại chuỗi đến 5 lần, $n$ mới đủ lớn để chuỗi được nén hiệu quả.
+
+\textbf{Trường hợp 2:}
+
+Ở đây sẽ tính một kí tự sẽ tính là 32 bit theo chuẩn UTF-8, số lượng node cũng sẽ tính là 32 bit.
+
+\begin{table}[H]
+  \fontsize{13}{18}\selectfont
+    \begin{center}
+      \begin{tabular*}{\linewidth}{@{}|>{\centering}m{0.59\linewidth}|>{\centering\arraybackslash}m{0.1\linewidth}|>{\centering\arraybackslash}m{0.1\linewidth}|>
+      {\centering\arraybackslash}m{0.1\linewidth}|}
+        \hline
+        \textbf{Đoạn kí tự} & \textbf{Trước khi nén} &  \textbf{Sau khi nén} & \textbf{Hiệu suất}\\
+        \hline
+        abcdefghiklmnopqrstuvwxyz & 800 & 998 & 0.8\\
+        \hline
+        aaaaaaaaaaaaaaa & 480 & 80 & 6\\
+        \hline
+        \makecell{Trăm năm trong cõi người ta,\\Chữ tài chữ mệnh khéo là ghét nhau.\\Trải qua một cuộc bể dâu,\\Những điều trông thấy mà đau đớn lòng.} & 4192 & 2082 & 2.0\\
+        \hline
+      \end{tabular*}
+      \caption[So sánh hiệu suất trường hợp 2]{Tổng hợp lại kết quả khi chạy với mỗi kí tự 32 bit}
+    \end{center}
+  \end{table}
+
+Nhận xét:
+
+ \begin{itemize}
+    \item Tỉ số nén cho chuỗi 1 là 0.8, độ dài bit từ 800 bit lên 998 bit, kết quả nén và giải nén không đổi (lossless) nặng hơn ban đầu.
+    \item Đối với chuỗi 2, dữ liệu dễ nén tần suất xuất hiện cao, tỉ lệ nén lên đến 6.
+    \item Đối với chuỗi 3 là một đoạn văn bản, tỉ số nén bao gồm cả từ điển là 2.0 từ hơn 4192 bit xuống 2082 bit.
+\end{itemize}
+
+Bên cạnh đó, thuật toán Huffman có một điểm đặc biệt mà các thuật toán khác không có là nó xử lý theo từng bit một, chỉ cần một cây có sẵn chúng ta không cần có hết các bit vẫn có thể giải được, không cần quan tâm bit tiếp theo. Việc này phù hợp cho việc truyền thông tin trực tiếp, không cần phải đợi đến khi có đủ dữ liệu để giải mã như HTTP, SMB, ...
+
+Bên cạnh đó để tiết kiệm dung lượng cho file nén, người ta có thể dùng chung cây như thuật toán. Còn không có cây, không thể giải mã, một hình thức bảo mật. Nhưng Huffman không được sử dụng như một thuật toán mã hóa (encrypt).
